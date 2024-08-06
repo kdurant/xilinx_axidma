@@ -33,3 +33,4 @@ output/
 # Allow for gitignore files and the LICENSE
 !.gitignore
 !/LICENSE
+!*.bb

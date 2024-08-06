@@ -18,7 +18,7 @@
 #include <linux/of_address.h>
 
 // Local dependencies
-#include "axidma.h"                 // Internal definitions
+#include "axidma.h"  // Internal definitions
 
 /*----------------------------------------------------------------------------
  * Module Parameters
@@ -38,12 +38,13 @@ module_param(minor_num, int, S_IRUGO);
 
 static int axidma_probe(struct platform_device *pdev)
 {
-    int rc;
+    int                   rc;
     struct axidma_device *axidma_dev;
 
     // Allocate a AXI DMA device structure to hold metadata about the DMA
     axidma_dev = kmalloc(sizeof(*axidma_dev), GFP_KERNEL);
-    if (axidma_dev == NULL) {
+    if(axidma_dev == NULL)
+    {
         axidma_err("Unable to allocate the AXI DMA device structure.\n");
         return -ENOMEM;
     }
@@ -51,18 +52,20 @@ static int axidma_probe(struct platform_device *pdev)
 
     // Initialize the DMA interface
     rc = axidma_dma_init(pdev, axidma_dev);
-    if (rc < 0) {
+    if(rc < 0)
+    {
         goto free_axidma_dev;
     }
 
     // Assign the character device name, minor number, and number of devices
     axidma_dev->chrdev_name = chrdev_name;
-    axidma_dev->minor_num = minor_num;
+    axidma_dev->minor_num   = minor_num;
     axidma_dev->num_devices = NUM_DEVICES;
 
     // Initialize the character device for the module.
     rc = axidma_chrdev_init(axidma_dev);
-    if (rc < 0) {
+    if(rc < 0)
+    {
         goto destroy_dma_dev;
     }
 
@@ -96,17 +99,16 @@ static int axidma_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id axidma_compatible_of_ids[] = {
-    { .compatible = "xlnx,axidma-chrdev" },
-    {}
-};
+    {.compatible = "xlnx,axidma-chrdev"},
+    {}};
 
 static struct platform_driver axidma_driver = {
     .driver = {
-        .name = MODULE_NAME,
-        .owner = THIS_MODULE,
-        .of_match_table = axidma_compatible_of_ids,
-    },
-    .probe = axidma_probe,
+               .name           = MODULE_NAME,
+               .owner          = THIS_MODULE,
+               .of_match_table = axidma_compatible_of_ids,
+               },
+    .probe  = axidma_probe,
     .remove = axidma_remove,
 };
 
@@ -116,6 +118,7 @@ static struct platform_driver axidma_driver = {
 
 static int __init axidma_init(void)
 {
+    printk(KERN_INFO "AXI DMA module loaded\n");
     return platform_driver_register(&axidma_driver);
 }
 
@@ -132,5 +135,6 @@ MODULE_AUTHOR("Jared Choi");
 
 MODULE_LICENSE("GPL");
 MODULE_VERSION("1.0");
-MODULE_DESCRIPTION("Module to provide a userspace interface for transferring "
-                   "data from the processor to the logic fabric via AXI DMA.");
+MODULE_DESCRIPTION(
+    "Module to provide a userspace interface for transferring "
+    "data from the processor to the logic fabric via AXI DMA.");
