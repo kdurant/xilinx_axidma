@@ -1,5 +1,5 @@
 /**
-only write data of the array to PL
+only read data from to PL
  **/
 
 #include <stdlib.h>
@@ -28,14 +28,14 @@ struct dma_transfer
     int   input_size;     // The amount of data to send
     void *input_buf;      // The buffer to hold the input data
 
-    int   output_channel;  // The channel used to receive the data
+    int   output_channel;  // The channel used to receive the data from PL
     int   output_size;     // The amount of data to receive
     void *output_buf;      // The buffer to hold the output
 };
 
-int tx_len = 0;
+int len = 0;
 
-int main(void)
+int main(int argc, char **argv)
 {
     int                 rc;
     struct dma_transfer trans;
@@ -77,20 +77,17 @@ int main(void)
     printf("\tTransmit Channel: %d\n", trans.input_channel);
     printf("\tReceive Channel: %d\n", trans.output_channel);
 
-    trans.input_size = 1024;
-    trans.input_buf  = axidma_malloc(axidma_dev, trans.input_size);
-    for(int i = 0; i < 1024; i++)
-        *((unsigned char *)(trans.input_buf + i)) = i;
-    tx_len = 32;
+    trans.output_size = 1024;
+    trans.output_buf  = axidma_malloc(axidma_dev, trans.output_size);
 
-    // while(1)
+    while(1)
     {
-        rc = axidma_oneway_transfer(axidma_dev, trans.input_channel, trans.input_buf, tx_len, true);
+        rc = axidma_oneway_transfer(axidma_dev, trans.output_channel, trans.output_buf, len, true);
         rc = (rc < 0) ? -rc : 0;
     }
 
 destroy_axidma:
     axidma_destroy(axidma_dev);
-
+ret:
     return rc;
 }
